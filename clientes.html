@@ -1,0 +1,123 @@
+<html>
+
+<head>
+    <title>
+        Lista de clientes
+    </title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+
+<body onload="listar()">
+
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
+            aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="home.html">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Clientes</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+
+    <h1>Clientes</h1>
+    <br>
+
+    <div style="text-align: end; margin-right: 50px;">
+        <a href="cadastro_cliente.html">
+            <img src="images/insert_icon.png" width="30">
+        </a>
+    </div>
+
+    <br>
+
+    <table id="table" class="table">
+        <thead>
+            <tr>
+                <th scope="col">Nome</th>
+                <th scope="col">E-mail</th>
+                <th scope="col">Telefone</th>
+                <th scope="col">CPF</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <!-- Bem aqui será gerada a tag TR que indica a linha que precisaremos gerar repetição com base
+            na lista que iremos obter da API para relacionar todos os clientes existentes -->
+    </table>
+</body>
+
+</html>
+
+<!-- 
+    Aqui abaixo nós colocamos
+    o código javascript obter a lista de clientes da API
+    e "renderizá-la" em nossa tela
+-->
+
+<script language="javascript">
+    function listar() {
+
+        //Enviando para a API o json 
+        //construído na etapa anterior
+        fetch('http://127.0.0.1:5000/cliente/listar',
+            {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
+                method: "GET" //Veja que aqui eu informo o verbo da requisição REST
+            })
+            .then(function (res) {
+                res.json()
+                    .then(lista => {
+                        console.log(lista)
+                        inserirLinhas(lista)
+                    })
+            })
+            .catch(function (res) { console.log(res) })
+    }
+
+    function inserirLinhas(lista) {
+        for (var i = 0; i < lista.length; i++) {
+            var row = $('<tr/>');
+            row.append($('<td/>').html(lista[i]['nome']));
+            row.append($('<td/>').html(lista[i]['email']));
+            row.append($('<td/>').html(lista[i]['telefone']));
+            row.append($('<td/>').html(lista[i]['cpf']));
+            row.append($('<td/>').html('<img src="images/delete_icon.png" width="30" onclick="deletar(' + i + ')" style="cursor: pointer;">'));
+            $('#table').append(row);
+        }
+    }
+
+    function deletar(nroLinha) {
+        fetch('http://127.0.0.1:5000/cliente/deletar/' + String(nroLinha),
+            {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
+                method: "DELETE"
+            })
+            .then(function (res) {
+                res.json()
+                    .then(data => {
+                        console.log('OK')
+                        document.location.reload(true);
+                    })
+            })
+            .catch(function (res) { console.log(res) })
+    }
+
+</script>
